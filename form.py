@@ -1,54 +1,145 @@
-from tkinter import *
+import tkinter as tk
+import os
+import tkinter.filedialog
+# import shutil for copping fileOBJ
 
-def save_info():
-    first_name_info = firstname.get()
-    last_name_info = lastname.get()
-    age_info = age.get()
+i = 0
 
-    print(first_name_info,last_name_info,age_info)
+class ScrolledFrame(tk.Frame):
 
-    file = open("user.txt","w")
+    def __init__(self, parent, vertical=True, horizontal=False):
+        global ent1
+        global ent2
+        super().__init__(parent)
 
-    file.write("Your First name :" + first_name_info)
-    file.write("\n")
-    file.write("Your last name :" + last_name_info)
-    file.write("\n")
-    file.write("Your age :" + str(age_info))
+        self._canvas = tk.Canvas(self)
+        self._canvas.grid(row=0, column=0)
 
-    file.close()
+        self._vertical_bar = tk.Scrollbar(self, orient="vertical", 
+command=self._canvas.yview)
+        if vertical:
+            self._vertical_bar.grid(row=0, column=1, sticky="ns")
+        self._canvas.configure(yscrollcommand=self._vertical_bar.set)
 
-app = Tk()
+        self._horizontal_bar = tk.Scrollbar(self, orient="horizontal", 
+command=self._canvas.xview)
+        if horizontal:
+            self._horizontal_bar.grid(row=1, column=0, sticky="we")
+        self._canvas.configure(xscrollcommand=self._horizontal_bar.set)
 
-app.geometry("600x600")
+        self.frame = tk.Frame(self._canvas)
+        self._canvas.create_window((0, 0), window=self.frame, anchor="nw")
 
-app.title("pythtn form GUI")
+        self.frame.bind("<Configure>", self.resize)
+
+        btn1 = tkinter.Button(root, text="Source Path", command = call)
+        btn1.pack(fill="both", expand=1)
+
+        ent1 = tkinter.Entry(root)
+        ent1.pack(fill="both", expand=1)
+
+        # btn1 = tkinter.Button(root, text="destination",command = des)
+        # btn1.pack(fill="bot   ", expand=1)
+
+        # ent2 = tkinter.Entry(root)
+        # ent2.pack(fill="both", expand=1)
+
+        # cpy = tkinter.Button(root, text="Copy",command = copy_file)
+        # cpy.pack(fill="x")
 
 
-heading = Label(text="pythtn form GUI",bg="yellow",fg="black",font="10",width="500",height="3")
+        self.pack()
 
-heading.pack()
+    def resize(self, event=None): 
+        self._canvas.configure(scrollregion=self._canvas.bbox("all"))
 
-firstname_text = Label(text="firstname :")
-lastname_text = Label(text="lastname :")
-age_text = Label(text="Age :")
 
-firstname_text.place(x=15, y=70)
-lastname_text.place(x=15 , y=140)
-age_text.place(x=15, y=210)
+#This is not in class    
+def call():
+     global filez
+     global buttons
+     global i
 
-firstname = StringVar()
-lastname = StringVar()
-age = IntVar()
 
-first_name_entry = Entry(textvariable=firstname,width="30")
-last_name_entry = Entry(textvariable=lastname,width="30")
-age_entry = Entry(textvariable=age,width="30")
+     buttons = []
+     filez = tkinter.filedialog.askdirectory(parent=root,
+     initialdir = "/",title='Choose a file')
+     ent1.delete(0,"end") 
+     ent1.insert(0, filez)  
 
-first_name_entry.place(x=15, y=100)
-last_name_entry.place(x=15, y=180)
-age_entry.place(x=15, y=240)
+     dirs = os.listdir(filez)
 
-button = Button(app, text="Submit", command=save_info, width="30",bg="grey",height="2")
 
-button.place(x=15,y=290)
-mainloop()
+     # remove previous IntVars
+     intvar_dict.clear()
+
+     # remove previous Checkboxes      
+     for cb in checkbutton_list:
+        cb.destroy()
+     checkbutton_list.clear()
+
+
+
+     for filename in dirs:
+
+         # create IntVar for filename and keep in dictionary
+         intvar_dict[filename] = tk.IntVar()
+
+         # create Checkbutton for filename and keep on list
+         c = tk.Checkbutton(sf.frame, text=filename, 
+variable=intvar_dict[filename])
+         c.pack()
+         checkbutton_list.append(c)
+         buttons.append((intvar_dict[filename],filename))
+     #check all
+     if  i == 0:    
+         var = tk.IntVar()
+         c1 = tk.Checkbutton(root, text="select all", 
+variable=var,command=select_all,activebackground='red',foreground='red')
+         c1.pack(side="left")
+         i = i + 1
+
+# def des():
+#     global destination
+
+#     destination = tkinter.filedialog.askdirectory(parent=root, title='Choose a Path')
+#     ent2.delete(0,"end")
+#     ent2.insert(20, destination)
+
+# def copy_file():
+#     for key, value in intvar_dict.items():
+#         if value.get() > 0:
+#             src_path = filez +"//"+key
+#             if (os.path.isfile(src_path)) == True: 
+#                 shutil.copy(src_path,destination) 
+#             elif (os.path.isdir(src_path)) == True:
+
+#                  shutil.copytree(src_path,destination+"//"+key)
+#             else:
+#                 pass
+#     for item in buttons:
+#         v , n = item
+#         if v.get():
+#             v.set(0)
+
+
+# def select_all(): # Corrected
+#     for item in buttons:
+#         v , n = item
+#         if v.get():
+#             v.set(0)
+#         else:
+#             v.set(1)            
+
+
+
+root = tk.Tk()
+
+intvar_dict = {}
+checkbutton_list = []
+
+sf = ScrolledFrame(root)
+
+#call()
+
+root.mainloop()
